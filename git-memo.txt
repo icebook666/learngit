@@ -1,0 +1,82 @@
+以下資料來源(廖雪峰的官方網路)
+https://www.liaoxuefeng.com/wiki/896043488029600
+
+初始化一個Git倉庫，使用git init命令
+
+添加文件到Git倉庫，分兩步：
+使用命令git add <file>，注意，可反復多次使用，添加多個檔；
+使用命令git commit -m <message>，完成
+
+要隨時掌握工作區的狀態，使用git status命令
+如果git status告訴你有檔被修改過，用git diff可以查看修改內容
+
+HEAD指向的版本就是當前版本，因此，Git允許我們在版本的歷史之間穿梭，使用命令git reset --hard commit_id
+穿梭前，用git log可以查看提交歷史，以便確定要回退到哪個版本
+要重返未來，用git reflog查看命令歷史，以便確定要回到未來的哪個版本
+
+暫存區是Git非常重要的概念，弄明白了暫存區，就弄明白了Git的很多操作到底幹了什麼
+
+每次修改，如果不用git add到暫存區，那就不會加入到commit中
+
+場景1：當你改亂了工作區某個檔的內容，想直接丟棄工作區的修改時，用命令git checkout -- file
+場景2：當你不但改亂了工作區某個檔的內容，還添加到了暫存區時，想丟棄修改，分兩步，第一步用命令git reset HEAD <file>，就回到了場景1，第二步按場景1操作。
+場景3：已經提交了不合適的修改到版本庫時，想要撤銷本次提交，使用命令git reset --hard commit_id，不過前提是沒有推送到遠端庫
+
+命令git rm用於刪除一個檔。如果一個檔已經被提交到版本庫，那麼你永遠不用擔心誤刪，但是要小心，你只能恢復檔到最新版本，你會丟失最近一次提交後你修改的內容
+
+由於你的本地Git倉庫和GitHub倉庫之間的傳輸是通過SSH加密的，所以，需要一點設置：
+第1步：創建SSH Key。在用戶主目錄下，看看有沒有.ssh目錄，如果有，再看看這個目錄下有沒有id_rsa和id_rsa.pub這兩個檔，如果已經有了，可直接跳到下一步。如果沒有，打開Shell（Windows下打開Git Bash），創建SSH Key：
+$ ssh-keygen -t rsa -C "youremail@example.com"
+在用戶主目錄裡找到.ssh目錄，裡面有id_rsa和id_rsa.pub兩個檔，這兩個就是SSH Key的秘鑰對，id_rsa是私密金鑰，不能洩露出去，id_rsa.pub是公開金鑰，可以放心地告訴任何人
+第2步：登陸GitHub，打開“Account settings”，“SSH Keys”頁面：
+然後，點“Add SSH Key”，填上任意Title，在Key文字方塊裡粘貼id_rsa.pub檔的內容
+
+要關聯一個遠端庫，使用命令git remote add origin git@server-name:path/repo-name.git；
+關聯後，使用命令git push -u origin master第一次推送master分支的所有內容；
+此後，每次本地提交後，只要有必要，就可以使用命令git push origin master推送最新修改；
+
+git clone git@github.com:icebook666/gitskills.git
+要克隆一個倉庫，首先必須知道倉庫的位址，然後使用git clone命令克隆
+Git支援多種協定，包括https，但ssh協定速度最快
+
+Git鼓勵大量使用分支：
+查看分支：git branch
+創建分支：git branch <name>
+切換分支：git checkout <name>或者git switch <name>
+創建+切換分支：git checkout -b <name>或者git switch -c <name>
+合併指定分支到當前分支：git merge <name>
+刪除分支：git branch -d <name>
+
+當Git無法自動合併分支時，就必須首先解決衝突。解決衝突後，再提交，合併完成
+解決衝突就是把Git合併失敗的檔手動編輯為我們希望的內容，再提交
+用git log --graph命令可以看到分支合併圖
+git log --graph --pretty=oneline --abbrev-commit
+
+合併分支時，加上--no-ff參數就可以用普通模式合併，合併後的歷史有分支，能看出來曾經做過合併，而fast forward合併就看不出來曾經做過合併
+ex: git merge --no-ff -m "merge with no-ff" dev
+
+開發一個新feature，最好新建一個分支
+如果要丟棄一個沒有被合併過的分支，可以通過git branch -D <name>強行刪除
+
+多人協作的工作模式通常是這樣：
+1.首先，可以試圖用git push origin <branch-name>推送自己的修改；
+2.如果推送失敗，則因為遠端分支比你的本地更新，需要先用git pull試圖合併；
+3.如果合併有衝突，則解決衝突，並在本地提交；
+4.沒有衝突或者解決掉衝突後，再用git push origin <branch-name>推送就能成功！
+如果git pull提示no tracking information，則說明本地分支和遠端分支的連結關係沒有創建，用命令git branch --set-upstream-to <branch-name> origin/<branch-name>
+
+查看遠端庫資訊，使用git remote -v；
+本地新建的分支如果不推送到遠端，對其他人就是不可見的；
+從本地推送分支，使用git push origin branch-name，如果推送失敗，先用git pull抓取遠程的新提交；
+在本地創建和遠端分支對應的分支，使用git checkout -b branch-name origin/branch-name，本地和遠端分支的名稱最好一致；
+建立本地分支和遠端分支的關聯，使用git branch --set-upstream branch-name origin/branch-name；
+從遠端抓取分支，使用git pull，如果有衝突，要先處理衝突
+
+命令git tag <tagname>用於新建一個標籤，默認為HEAD，也可以指定一個commit id；
+命令git tag -a <tagname> -m "blablabla..."可以指定標籤資訊；
+命令git tag可以查看所有標籤。
+
+命令git push origin <tagname>可以推送一個本地標籤；
+命令git push origin --tags可以推送全部未推送過的本地標籤；
+命令git tag -d <tagname>可以刪除一個本地標籤；
+命令git push origin :refs/tags/<tagname>可以刪除一個遠端標籤。
