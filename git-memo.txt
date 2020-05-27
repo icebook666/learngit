@@ -1,4 +1,4 @@
-以下資料來源(廖雪峰的官方網路)
+以下資料來源(廖雪峰的官方網站)
 https://www.liaoxuefeng.com/wiki/896043488029600
 
 初始化一個Git倉庫，使用git init命令
